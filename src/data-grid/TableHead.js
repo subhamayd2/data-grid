@@ -22,7 +22,7 @@ const TableHead = () => {
     state: { pageSize },
   } = useDataGridContext();
 
-  const handleSort = (col) => () => {
+  const handleSort = (col) => (e) => {
     const { id, isSortedDesc, isSorted } = col;
 
     let isDesc = isSorted ? !isSortedDesc : false;
@@ -55,40 +55,47 @@ const TableHead = () => {
                 hideSortIcon: true,
                 active: isSorted,
                 direction: sortDirection,
+                // onClick: handleSort(column),
               };
             }
 
+            // console.log({ resize: column.getResizerProps() });
+
             return (
-              <Box component="th" {...column.getHeaderProps()} display="flex">
-                <TableCell
-                  style={{ flexGrow: 1, display: "inline" }}
-                  component="div"
-                  sortDirection={isSorted ? sortDirection : false}
-                  {...(isColumnSortable
+              <TableCell
+                {...column.getHeaderProps(
+                  isColumnSortable
                     ? column.getSortByToggleProps({
                         title: `${formatMessage({ id: "sort.by" })} ${
                           column.Header
                         }`,
                         onClick: handleSort(column),
                       })
-                    : {})}
-                >
-                  <SortWrapper {...sortWrapperProps}>
+                    : {}
+                )}
+                sortDirection={isSorted ? sortDirection : false}
+              >
+                <Box position="relative" display="flex">
+                  <SortWrapper {...sortWrapperProps} style={{ flexGrow: 1 }}>
                     <Typography variant="subtitle2" component="div">
                       {column.render("Header")}
                     </Typography>
                   </SortWrapper>
-                </TableCell>
-                {canResize && (
-                  <Box
-                    {...column.getResizerProps({
-                      className: dragIndicatorWrapperStyle,
-                    })}
-                  >
-                    <DragIndicator color="inherit" />
-                  </Box>
-                )}
-              </Box>
+                  {canResize && (
+                    <Box
+                      zIndex={2}
+                      {...column.getResizerProps({
+                        className: dragIndicatorWrapperStyle,
+                      })}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                      }}
+                    >
+                      <DragIndicator color="inherit" />
+                    </Box>
+                  )}
+                </Box>
+              </TableCell>
             );
           })}
         </TableRow>
@@ -103,6 +110,10 @@ const useStyles = makeStyles((theme) => ({
     position: "absolute",
     right: 0,
     top: 0,
+    touchAction: "none",
+    "&:hover, &:active": {
+      color: theme.palette.primary.main,
+    },
   },
 }));
 

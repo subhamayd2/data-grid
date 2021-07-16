@@ -4,7 +4,6 @@ import {
   useTable,
   usePagination,
   useSortBy,
-  useFlexLayout,
   useResizeColumns,
   useBlockLayout,
 } from "react-table";
@@ -16,6 +15,7 @@ import {
   TableCell,
   TableContainer,
   TableRow,
+  Typography,
 } from "@material-ui/core";
 import Pagination from "./Pagination";
 import { DataGridProvider } from "./DataGridContext";
@@ -106,8 +106,17 @@ const DataGrid = (props) => {
                 <TableRow {...row.getRowProps()}>
                   {row.cells.map((cell) => {
                     return (
-                      <TableCell {...cell.getCellProps()}>
-                        {cell.render("Cell")}
+                      <TableCell
+                        {...cell.getCellProps({
+                          style: {
+                            textOverflow: "ellipsis",
+                            overflowX: "hidden",
+                          },
+                        })}
+                      >
+                        <Typography variant="inherit" noWrap>
+                          {cell.render("Cell")}
+                        </Typography>
                       </TableCell>
                     );
                   })}
