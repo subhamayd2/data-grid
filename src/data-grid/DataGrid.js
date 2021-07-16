@@ -4,33 +4,24 @@ import {
   useTable,
   usePagination,
   useSortBy,
-  useFlexLayout,
   useResizeColumns,
-  useBlockLayout,
+  useFlexLayout,
 } from "react-table";
-import {
-  makeStyles,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableRow,
-} from "@material-ui/core";
+import { makeStyles, Paper } from "@material-ui/core";
 import Pagination from "./Pagination";
 import { DataGridProvider } from "./DataGridContext";
 import { useControlledProps } from "./helpers";
 import TableHead from "./TableHead";
 import { useIntl } from "react-intl";
 import { isEmpty } from "lodash";
+import TableBody from "./TableBody";
 
 /**
  * DataGrid component
  */
 const DataGrid = (props) => {
   const { paperWrapper, tableStyle, tableFooterStyle } = useStyles();
-  const { data, children, page, pageSize, recordCount, sortable, dense } =
-    props;
+  const { data, children, page, pageSize, recordCount, sortable } = props;
   const { formatMessage } = useIntl();
 
   const columns = useMemo(
@@ -65,7 +56,7 @@ const DataGrid = (props) => {
       disableSortRemove: true,
     },
     useResizeColumns,
-    useBlockLayout,
+    useFlexLayout,
     useSortBy,
     usePagination
   );
@@ -77,10 +68,7 @@ const DataGrid = (props) => {
   useControlledProps({ page, pageSize, tableInstance });
 
   const {
-    prepareRow,
-    page: tablePage,
     getTableProps,
-    getTableBodyProps,
     state: { pageSize: statePageSize },
   } = tableInstance;
 
@@ -93,35 +81,17 @@ const DataGrid = (props) => {
     <DataGridProvider
       value={{ ...tableInstance, pageCount, dataGridProps: props }}
     >
-      <TableContainer component={Paper} className={paperWrapper}>
-        <Table
-          size={dense ? "small" : null}
-          {...getTableProps({ className: tableStyle })}
-        >
+      <div component={Paper} className={paperWrapper}>
+        <div {...getTableProps({ className: tableStyle })}>
           <TableHead />
-          <TableBody {...getTableBodyProps()}>
-            {tablePage.map((row) => {
-              prepareRow(row);
-              return (
-                <TableRow {...row.getRowProps()}>
-                  {row.cells.map((cell) => {
-                    return (
-                      <TableCell {...cell.getCellProps()}>
-                        {cell.render("Cell")}
-                      </TableCell>
-                    );
-                  })}
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
+          <TableBody />
+        </div>
         <div component="div" className={tableFooterStyle}>
           <Paper>
             <Pagination />
           </Paper>
         </div>
-      </TableContainer>
+      </div>
     </DataGridProvider>
   );
 };
@@ -132,6 +102,7 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     flexDirection: "column",
     height: "100%",
+    backgroundColor: theme.palette.background.paper,
   },
   tableStyle: {
     flex: 1,

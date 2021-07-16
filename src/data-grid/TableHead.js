@@ -1,16 +1,10 @@
-import React from "react";
-import {
-  Box,
-  makeStyles,
-  TableCell,
-  TableHead as CoreTableHead,
-  TableRow,
-  TableSortLabel,
-  Typography,
-} from "@material-ui/core";
+import React, { memo } from "react";
+import { Box, makeStyles, TableSortLabel, Typography } from "@material-ui/core";
 import { useDataGridContext } from "./DataGridContext";
 import { useIntl } from "react-intl";
 import { DragIndicator } from "@material-ui/icons";
+import TableCell from "./TableCell";
+import TableRow from "./TableRow";
 
 const TableHead = () => {
   const { dragIndicatorWrapperStyle } = useStyles();
@@ -38,7 +32,7 @@ const TableHead = () => {
   };
 
   return (
-    <CoreTableHead>
+    <div>
       {headerGroups.map((headerGroup) => (
         <TableRow {...headerGroup.getHeaderGroupProps()}>
           {headerGroup.headers.map((column) => {
@@ -52,6 +46,7 @@ const TableHead = () => {
             let sortWrapperProps = {};
             if (isColumnSortable) {
               sortWrapperProps = {
+                component: "div",
                 hideSortIcon: true,
                 active: isSorted,
                 direction: sortDirection,
@@ -59,10 +54,9 @@ const TableHead = () => {
             }
 
             return (
-              <Box component="th" {...column.getHeaderProps()} display="flex">
+              <Box {...column.getHeaderProps()} display="flex">
                 <TableCell
                   style={{ flexGrow: 1, display: "inline" }}
-                  component="div"
                   sortDirection={isSorted ? sortDirection : false}
                   {...(isColumnSortable
                     ? column.getSortByToggleProps({
@@ -93,7 +87,7 @@ const TableHead = () => {
           })}
         </TableRow>
       ))}
-    </CoreTableHead>
+    </div>
   );
 };
 
@@ -106,4 +100,4 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default TableHead;
+export default memo(TableHead);
