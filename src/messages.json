@@ -4,5 +4,6 @@
     "amount": "Amount",
     "status": "Status",
     "date": "Date",
-    "sort.by": "Sort by"
+    "sort.by": "Sort by",
+    "resize": "Resize"
 }

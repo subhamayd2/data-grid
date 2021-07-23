@@ -6,23 +6,17 @@ import {
   useSortBy,
   useResizeColumns,
   useBlockLayout,
+  useRowSelect,
 } from "react-table";
-import {
-  makeStyles,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableRow,
-  Typography,
-} from "@material-ui/core";
+import { makeStyles, Paper, Table, TableContainer } from "@material-ui/core";
 import Pagination from "./Pagination";
 import { DataGridProvider } from "./DataGridContext";
 import { useControlledProps } from "./helpers";
 import TableHead from "./TableHead";
 import { useIntl } from "react-intl";
 import { isEmpty } from "lodash";
+import TableBody from "./TableBody";
+import SelectionCheckbox from "./SelectionCheckbox";
 
 /**
  * DataGrid component
@@ -60,14 +54,44 @@ const DataGrid = (props) => {
       pageCount: -1,
       // Sorting options
       manualSortBy: true,
-      defaultCanSort: sortable,
+      disableSortBy: !sortable,
       disableMultiSort: true,
       disableSortRemove: true,
     },
     useResizeColumns,
     useBlockLayout,
     useSortBy,
-    usePagination
+    usePagination,
+    useRowSelect,
+    (hooks) => {
+      hooks.visibleColumns.push((columns) => [
+        //Let's make a column for selection
+        {
+          defaultCanSort: false,
+          width: 40,
+          disableSortBy: true,
+          disableResizing: true,
+          id: "selection",
+          // The header can use the table's getToggleAllRowsSelectedProps method
+          // to render a checkbox
+          Header: ({ getToggleAllPageRowsSelectedProps }) => {
+            return (
+              <div>
+                <SelectionCheckbox {...getToggleAllPageRowsSelectedProps()} />
+              </div>
+            );
+          },
+          // The cell can use the individual row's getToggleRowSelectedProps method
+          // to the render a checkbox
+          Cell: ({ row }) => (
+            <div>
+              <SelectionCheckbox {...row.getToggleRowSelectedProps()} />
+            </div>
+          ),
+        },
+        ...columns,
+      ]);
+    }
   );
 
   /**
@@ -77,10 +101,7 @@ const DataGrid = (props) => {
   useControlledProps({ page, pageSize, tableInstance });
 
   const {
-    prepareRow,
-    page: tablePage,
     getTableProps,
-    getTableBodyProps,
     state: { pageSize: statePageSize },
   } = tableInstance;
 
@@ -99,31 +120,7 @@ const DataGrid = (props) => {
           {...getTableProps({ className: tableStyle })}
         >
           <TableHead />
-          <TableBody {...getTableBodyProps()}>
-            {tablePage.map((row) => {
-              prepareRow(row);
-              return (
-                <TableRow {...row.getRowProps()}>
-                  {row.cells.map((cell) => {
-                    return (
-                      <TableCell
-                        {...cell.getCellProps({
-                          style: {
-                            textOverflow: "ellipsis",
-                            overflowX: "hidden",
-                          },
-                        })}
-                      >
-                        <Typography variant="inherit" noWrap>
-                          {cell.render("Cell")}
-                        </Typography>
-                      </TableCell>
-                    );
-                  })}
-                </TableRow>
-              );
-            })}
-          </TableBody>
+          <TableBody />
         </Table>
         <div component="div" className={tableFooterStyle}>
           <Paper>
@@ -135,7 +132,7 @@ const DataGrid = (props) => {
   );
 };
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   paperWrapper: {
     overflow: "auto",
     display: "flex",

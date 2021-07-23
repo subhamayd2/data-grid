@@ -42,6 +42,12 @@ Column.propTypes = {
    * Max-width of the column. Applicable when resizing
    */
   maxWidth: PropTypes.number,
+  /**
+   * The alignment of the header cell
+   *
+   * One of: `"left" | "center" | "right"`
+   */
+  align: PropTypes.oneOf(["left", "center", "right"]),
 };
 
 export default Column;

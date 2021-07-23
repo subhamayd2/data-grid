@@ -52,10 +52,15 @@ function App() {
         sortable
         onSort={handleOnSort}
       >
-        <Column accessor="bill_number" Header="bill.number" />
+        <Column accessor="bill_number" Header="bill.number" align="right" />
         <Column accessor="bill_amount" Header="amount" />
-        <Column accessor="bill_date" Header="date" />
-        <Column accessor="bill_status" Header="status" disableSortBy />
+        <Column accessor="bill_date" Header="date" align="center" />
+        <Column
+          accessor="bill_status"
+          Header="status"
+          disableSortBy
+          align="right"
+        />
       </DataGrid>
     </Box>
   );

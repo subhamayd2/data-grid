@@ -17,3 +17,14 @@ export const useControlledProps = ({ page, pageSize, tableInstance }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageSize]);
 };
+
+export const getAlignment = (align) => {
+  switch (align) {
+    case "right":
+      return "flex-end";
+    case "center":
+      return align;
+    default:
+      return "flex-start";
+  }
+};

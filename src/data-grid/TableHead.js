@@ -1,6 +1,7 @@
 import React from "react";
 import {
   Box,
+  Divider,
   makeStyles,
   TableCell,
   TableHead as CoreTableHead,
@@ -10,10 +11,11 @@ import {
 } from "@material-ui/core";
 import { useDataGridContext } from "./DataGridContext";
 import { useIntl } from "react-intl";
-import { DragIndicator } from "@material-ui/icons";
+import { getAlignment } from "./helpers";
 
 const TableHead = () => {
-  const { dragIndicatorWrapperStyle } = useStyles();
+  const { dragIndicatorWrapperStyle, headerContentStyle, tableCellStyle } =
+    useStyles();
   const { formatMessage } = useIntl();
   const {
     headerGroups,
@@ -47,52 +49,52 @@ const TableHead = () => {
             const sortDirection = isSortedDesc ? "desc" : "asc";
             const isColumnSortable = sortable && canSort;
 
-            const SortWrapper = isColumnSortable ? TableSortLabel : Box;
+            const ContentWrapper = isColumnSortable ? TableSortLabel : Box;
 
-            let sortWrapperProps = {};
+            let contentWrapperProps = {
+              className: headerContentStyle,
+            };
             if (isColumnSortable) {
-              sortWrapperProps = {
+              contentWrapperProps = {
+                ...contentWrapperProps,
                 hideSortIcon: true,
                 active: isSorted,
                 direction: sortDirection,
-                // onClick: handleSort(column),
               };
             }
 
-            // console.log({ resize: column.getResizerProps() });
+            const columnSortProps = column.getSortByToggleProps({
+              title: `${formatMessage({ id: "sort.by" })} ${column.Header}`,
+              onClick: handleSort(column),
+            });
 
             return (
               <TableCell
-                {...column.getHeaderProps(
-                  isColumnSortable
-                    ? column.getSortByToggleProps({
-                        title: `${formatMessage({ id: "sort.by" })} ${
-                          column.Header
-                        }`,
-                        onClick: handleSort(column),
-                      })
-                    : {}
-                )}
+                {...column.getHeaderProps({ className: tableCellStyle })}
                 sortDirection={isSorted ? sortDirection : false}
+                align={column.align}
               >
-                <Box position="relative" display="flex">
-                  <SortWrapper {...sortWrapperProps} style={{ flexGrow: 1 }}>
+                <Box display="flex" alignItems="stretch" width="100%">
+                  <ContentWrapper
+                    {...(isColumnSortable ? columnSortProps : {})}
+                    {...contentWrapperProps}
+                    style={{ justifyContent: getAlignment(column.align) }}
+                  >
                     <Typography variant="subtitle2" component="div">
                       {column.render("Header")}
                     </Typography>
-                  </SortWrapper>
+                  </ContentWrapper>
                   {canResize && (
-                    <Box
-                      zIndex={2}
+                    <div
                       {...column.getResizerProps({
                         className: dragIndicatorWrapperStyle,
+                        title: `${formatMessage({ id: "resize" })} ${
+                          column.Header
+                        }`,
                       })}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                      }}
                     >
-                      <DragIndicator color="inherit" />
-                    </Box>
+                      <Divider orientation="vertical" />
+                    </div>
                   )}
                 </Box>
               </TableCell>
@@ -106,14 +108,25 @@ const TableHead = () => {
 
 const useStyles = makeStyles((theme) => ({
   dragIndicatorWrapperStyle: {
-    color: theme.palette.divider,
-    position: "absolute",
-    right: 0,
-    top: 0,
-    touchAction: "none",
-    "&:hover, &:active": {
-      color: theme.palette.primary.main,
+    width: theme.spacing(1),
+    height: theme.spacing(2),
+    display: "flex",
+    flexDirection: "row-reverse",
+    marginLeft: "auto",
+    overflow: "hidden",
+    "&:hover > hr, &:active > hr": {
+      width: theme.spacing(0.25),
+      backgroundColor: theme.palette.primary.main,
     },
+  },
+  headerContentStyle: {
+    flexGrow: 1,
+    display: "flex",
+  },
+  tableCellStyle: {
+    display: "flex",
+    alignItems: "center",
+    padding: theme.spacing(0.75, 1),
   },
 }));
 
