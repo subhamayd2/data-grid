@@ -5,5 +5,7 @@
     "status": "Status",
     "date": "Date",
     "sort.by": "Sort by",
-    "resize": "Resize"
+    "resize": "Resize",
+    "website": "Website",
+    "avatar": "Avatar"
 }

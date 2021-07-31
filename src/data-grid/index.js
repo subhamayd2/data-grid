@@ -1,8 +1,8 @@
-import Column from "./Column";
-import DataGrid from "./DataGrid";
+import Column from './Column';
+import DataGrid from './DataGrid';
 
-export default DataGrid
+export default DataGrid;
 
 export {
-    Column
-}
+    Column,
+};
