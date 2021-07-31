@@ -54,42 +54,40 @@ function App() {
                 sortable
                 onSort={handleOnSort}
             >
-                <Column accessor="bill_number" header="bill.number" align="right" />
-                <Column accessor="bill_amount" header="amount" />
-                <Column accessor="bill_date" header="date" align="center" />
+                <Column accessor="bill_number" headerId="bill.number" align="right" />
+                <Column accessor="bill_amount" header="Amount ₹" />
+                <Column accessor="bill_date" headerId="date" align="center" />
                 <Column
                     accessor="customer.website"
-                    header="website"
+                    headerId="website"
                     cell={({ value }) => <Link href="#!">{value}</Link>}
                 />
                 <Column
                     accessor="customer.avatar"
-                    header="avatar"
+                    header={() => <span>📸</span>}
+                    titleId="avatar"
                     align="center"
                     disableSortBy
                     cell={({
-                        value, row, cell, ...other
-                    }) => {
-                        console.log({ row, other });
-                        return (
-                            <Box
-                                overflow="hidden"
-                                display="flex"
-                                justifyContent={cell.column.align}
-                            >
-                                <img
-                                    width={32}
-                                    height={32}
-                                    src={value}
-                                    alt={row.original.customer.name}
-                                />
-                            </Box>
-                        );
-                    }}
+                        value, row, cell,
+                    }) => (
+                        <Box
+                            overflow="hidden"
+                            display="flex"
+                            justifyContent={cell.column.align}
+                        >
+                            <img
+                                width={32}
+                                height={32}
+                                src={value}
+                                alt={row.original.customer.name}
+                            />
+                        </Box>
+                    )}
                 />
                 <Column
                     accessor="bill_status"
-                    header="status"
+                    headerId="status"
                     disableSortBy
                     align="right"
                 />

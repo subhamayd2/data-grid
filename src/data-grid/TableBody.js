@@ -21,7 +21,6 @@ const TableBody = () => {
                     <TableRow {...row.getRowProps()}>
                         {row.cells.map((cell) => {
                             const { column } = cell;
-                            console.log({ cell });
                             return (
                                 <TableCell
                                     {...cell.getCellProps({

@@ -12,13 +12,13 @@ import {
     makeStyles, Paper, Table, TableContainer,
 } from '@material-ui/core';
 import { useIntl } from 'react-intl';
-import { isEmpty } from 'lodash';
 import Pagination from './Pagination';
 import { DataGridProvider } from './DataGridContext';
-import { useControlledProps } from './helpers';
+import { getColumnHeader, useControlledProps } from './helpers';
 import TableHead from './TableHead';
 import TableBody from './TableBody';
 import SelectionCheckbox from './SelectionCheckbox';
+import { ColumnProps } from './Column';
 
 /**
  * DataGrid component
@@ -45,9 +45,7 @@ const DataGrid = (props) => {
             return ({
                 columnIndex: index,
                 ...child.props,
-                Header: isEmpty(child.props.header)
-                    ? ''
-                    : formatMessage({ id: child.props.header }),
+                Header: getColumnHeader(child.props, formatMessage),
                 ...optionalProperties,
             });
         }),
@@ -166,82 +164,87 @@ const useStyles = makeStyles(() => ({
 
 DataGrid.propTypes = {
     /**
-   * Array of data to be displayed
-   *
-   * @param {object[]} data
-   */
+     * Array of data to be displayed
+     *
+     * @param {object[]} data
+     */
     data: PropTypes.arrayOf(PropTypes.object).isRequired,
     /**
-   * Specify the `DataGrid` columns
-   *
-   * `<Column />`
-   */
+     * Specify the `DataGrid` columns
+     *
+     * `<Column />`
+     */
     children: PropTypes.node.isRequired,
     /**
-   * The current page of the `DataGrid` to display
-   *
-   * @param {int} page
-   * @default 0
-   */
+     * Optionally we can specify the columns as an array of `Column` objects
+     *
+     * @param {ColumnProps[]} columns
+     */
+    columns: PropTypes.arrayOf(PropTypes.shape(ColumnProps)),
     /**
-   * Make the rows more compact
-   *
-   * @param {boolean} dense
-   */
-    dense: PropTypes.bool,
+     * The current page of the `DataGrid` to display
+     *
+     * @param {int} page
+     * @default 0
+     */
     page: PropTypes.number,
     /**
-   * The number of rows of `DataGrid` to display
-   *
-   * @param {int} pageSize
-   * @default 10
-   */
+     * Make the rows more compact
+     *
+     * @param {boolean} dense
+     */
+    dense: PropTypes.bool,
+    /**
+     * The number of rows of `DataGrid` to display
+     *
+     * @param {int} pageSize
+     * @default 10
+     */
     pageSize: PropTypes.number,
     /**
-   * The total number of rows available
-   *
-   * @param {int} recordCount
-   */
+     * The total number of rows available
+     *
+     * @param {int} recordCount
+     */
     recordCount: PropTypes.number,
     /**
-   * Handle page change callback
-   *
-   * ```js
-   * function ({ page: number, pageSize: number }) => void
-   * ```
-   */
+     * Handle page change callback
+     *
+     * ```js
+     * function ({ page: number, pageSize: number }) => void
+     * ```
+     */
     onPageChange: PropTypes.func,
     /**
-   * Disables all the pagination inputs
-   *
-   * @param {boolean} disablePaginationInput
-   * @default false
-   */
+     * Disables all the pagination inputs
+     *
+     * @param {boolean} disablePaginationInput
+     * @default false
+     */
     disablePaginationInput: PropTypes.bool,
     /**
-   * Rows per page options available to select from
-   *
-   * @param {int[]} rowsPerPageOptions
-   * @default [5, 10, 20, 25]
-   */
+     * Rows per page options available to select from
+     *
+     * @param {int[]} rowsPerPageOptions
+     * @default [5, 10, 20, 25]
+     */
     rowsPerPageOptions: PropTypes.arrayOf(PropTypes.number),
     /**
-   * Make the columns sortable
-   *
-   * Use prop `disableSortby` on `<Column />` to disable sorting for that particular column
-   *
-   * @param {boolean} sortable
-   * @default false
-   *
-   */
+     * Make the columns sortable
+     *
+     * Use prop `disableSortby` on `<Column />` to disable sorting for that particular column
+     *
+     * @param {boolean} sortable
+     * @default false
+     */
     sortable: PropTypes.bool,
     /**
-   * Handle on column sort callback
-   *
-   * ```js
-   * function ({ sortBy: string, direction: 'asc' | 'desc', page: number, pageSize: number }) => void
-   * ```
-   */
+     * Handle on column sort callback
+     *
+     * ```js
+     * function ({ sortBy: string, direction: 'asc' | 'desc', page: number, pageSize: number }) => void
+     * ```
+     */
     onSort: PropTypes.func,
 };
 

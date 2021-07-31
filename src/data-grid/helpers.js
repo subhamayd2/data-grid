@@ -1,3 +1,4 @@
+import { isEmpty } from 'lodash';
 import { useEffect } from 'react';
 
 export const useControlledProps = ({ page, pageSize, tableInstance }) => {
@@ -18,6 +19,13 @@ export const useControlledProps = ({ page, pageSize, tableInstance }) => {
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [pageSize]);
+};
+
+export const getColumnHeader = ({ header, headerId }, formatMessage) => {
+    if (!isEmpty(headerId)) {
+        return formatMessage({ id: headerId });
+    }
+    return header;
 };
 
 export const getAlignment = (align) => {

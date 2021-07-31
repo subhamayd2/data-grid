@@ -10,6 +10,7 @@ import {
     Typography,
 } from '@material-ui/core';
 import { useIntl } from 'react-intl';
+import { isEmpty } from 'lodash';
 import { useDataGridContext } from './DataGridContext';
 import { getAlignment } from './helpers';
 
@@ -45,8 +46,10 @@ const TableHead = () => {
                 <TableRow {...headerGroup.getHeaderGroupProps()}>
                     {headerGroup.headers.map((column) => {
                         const {
-                            isSorted, isSortedDesc, canSort, canResize,
+                            isSorted, isSortedDesc, canSort, canResize, titleId,
                         } = column;
+
+                        const columnTitle = !isEmpty(titleId) ? formatMessage({ id: titleId }) : column.Header;
 
                         const sortDirection = isSortedDesc ? 'desc' : 'asc';
                         const isColumnSortable = sortable && canSort;
@@ -66,7 +69,7 @@ const TableHead = () => {
                         }
 
                         const columnSortProps = column.getSortByToggleProps({
-                            title: `${formatMessage({ id: 'sort.by' })} ${column.Header}`,
+                            title: `${formatMessage({ id: 'sort.by' })} ${columnTitle}`,
                             onClick: handleSort(column),
                         });
 
@@ -90,9 +93,7 @@ const TableHead = () => {
                                         <div
                                             {...column.getResizerProps({
                                                 className: dragIndicatorWrapperStyle,
-                                                title: `${formatMessage({ id: 'resize' })} ${
-                                                    column.Header
-                                                }`,
+                                                title: `${formatMessage({ id: 'resize' })} ${columnTitle}`,
                                             })}
                                         >
                                             <Divider orientation="vertical" />

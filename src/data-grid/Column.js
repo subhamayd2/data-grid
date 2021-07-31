@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
  */
 const Column = () => null;
 
-Column.propTypes = {
+export const ColumnProps = {
     /**
      * Path of the property to display from the `data` array object
      *
@@ -15,6 +15,8 @@ Column.propTypes = {
     /**
      * Name of the column
      *
+     * Receives the table instance and column model as props
+     *
      * `header: String | Function | React.Component => JSX`
      */
     header: PropTypes.oneOfType([
@@ -22,6 +24,18 @@ Column.propTypes = {
         PropTypes.func,
         PropTypes.node,
     ]),
+    /**
+     * Column name ID used for Intl
+     *
+     * `headerId: String`
+     */
+    headerId: PropTypes.string,
+    /**
+     * The Intl Id for title of the Column Header. Only needed when using custom component for Header
+     *
+     * `titleId: String`
+     */
+    titleId: PropTypes.string,
     /**
      * Add custom component to render in the cell
      *
@@ -65,5 +79,7 @@ Column.propTypes = {
      */
     align: PropTypes.oneOf(['left', 'center', 'right']),
 };
+
+Column.propTypes = ColumnProps;
 
 export default Column;
