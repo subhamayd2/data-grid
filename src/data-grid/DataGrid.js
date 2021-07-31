@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import {
     useTable,
@@ -12,12 +12,13 @@ import {
     makeStyles, Paper, Table, TableContainer,
 } from '@material-ui/core';
 import { useIntl } from 'react-intl';
+import { isEmpty } from 'lodash';
 import Pagination from './Pagination';
 import { DataGridProvider } from './DataGridContext';
 import { getColumnHeader, useControlledProps } from './helpers';
 import TableHead from './TableHead';
 import TableBody from './TableBody';
-import SelectionCheckbox from './SelectionCheckbox';
+import CellSelection from './CellSelection';
 import { ColumnProps } from './Column';
 
 /**
@@ -26,7 +27,19 @@ import { ColumnProps } from './Column';
 const DataGrid = (props) => {
     const { paperWrapper, tableStyle, tableFooterStyle } = useStyles();
     const {
-        data, children, page, pageSize, recordCount, sortable, dense,
+        data,
+        children,
+        page,
+        pageSize,
+        recordCount,
+        sortable,
+        dense,
+        columns: columnsProp,
+        singleSelect,
+        onRowSelect,
+        selected,
+        getRowId: getRowIdProp,
+        selectColumnLabel,
     } =
     props;
     const { formatMessage } = useIntl();
@@ -36,22 +49,40 @@ const DataGrid = (props) => {
     };
 
     const columns = useMemo(
-        () => React.Children.map(children, (child, index) => {
-            const optionalProperties = {};
-            if (child.props.cell) {
-                optionalProperties.Cell = child.props.cell;
-            }
+        () => (!isEmpty(columnsProp)
+            ? columnsProp
+            : React.Children.map(children, (child, index) => {
+                const optionalProperties = {};
+                if (child.props.cell) {
+                    optionalProperties.Cell = child.props.cell;
+                }
 
-            return ({
-                columnIndex: index,
-                ...child.props,
-                Header: getColumnHeader(child.props, formatMessage),
-                ...optionalProperties,
-            });
-        }),
+                return ({
+                    columnIndex: index,
+                    ...child.props,
+                    Header: getColumnHeader(child.props, formatMessage),
+                    ...optionalProperties,
+                });
+            })),
         // eslint-disable-next-line react-hooks/exhaustive-deps
         [],
     );
+
+    const initialSelectedIds = useMemo(() => {
+        const ids = {};
+        selected.forEach((sel) => {
+            ids[sel] = true;
+        });
+        return ids;
+    }, [selected]);
+
+    const getRowId = useCallback((row, relativeIndex, parent) => {
+        if (typeof getRowIdProp === 'string') {
+            return `${row[getRowIdProp]}`;
+        }
+        return `${getRowIdProp(row, relativeIndex, parent)}`;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const tableInstance = useTable(
         {
@@ -59,10 +90,12 @@ const DataGrid = (props) => {
             columns,
             defaultColumn: defaultColumnProps,
             data,
+            getRowId,
             // Pagination options
             initialState: {
                 pageIndex: page,
                 pageSize,
+                selectedRowIds: initialSelectedIds,
             },
             manualPagination: true,
             pageCount: -1,
@@ -82,25 +115,28 @@ const DataGrid = (props) => {
                 // Let's make a column for selection
                 {
                     defaultCanSort: false,
-                    width: 40,
+                    width: 56,
+                    minWidth: 0,
                     disableSortBy: true,
                     disableResizing: true,
                     id: 'selection',
+                    align: 'center',
                     // The header can use the table's getToggleAllRowsSelectedProps method
                     // to render a checkbox
+                    // <CellSelection {...selAllProps} />
                     // eslint-disable-next-line react/prop-types
-                    Header: ({ getToggleAllPageRowsSelectedProps }) => (
-                        <div>
-                            <SelectionCheckbox {...getToggleAllPageRowsSelectedProps()} />
-                        </div>
+                    Header: singleSelect ? selectColumnLabel : () => (
+                        <span>a</span>
                     ),
                     // The cell can use the individual row's getToggleRowSelectedProps method
                     // to the render a checkbox
                     // eslint-disable-next-line react/prop-types
-                    Cell: ({ row: { getToggleRowSelectedProps } }) => (
-                        <div>
-                            <SelectionCheckbox {...getToggleRowSelectedProps()} />
-                        </div>
+                    Cell: (selCellProps) => (
+                        <CellSelection
+                            {...selCellProps}
+                            singleSelect={singleSelect}
+                            onRowSelect={onRowSelect}
+                        />
                     ),
                 },
                 ...cols,
@@ -178,9 +214,22 @@ DataGrid.propTypes = {
     /**
      * Optionally we can specify the columns as an array of `Column` objects
      *
+     * **This will override the `<Columns />` passed as `children`**
+     *
      * @param {ColumnProps[]} columns
      */
     columns: PropTypes.arrayOf(PropTypes.shape(ColumnProps)),
+    /**
+     * Specify the key for getting the row id
+     *
+     * `getRowId: String | (row, index, parent?) => string`
+     *
+     * Either provide the key for the column to use as key or use the function to generate custom key from the row data
+     */
+    getRowId: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.func,
+    ]).isRequired,
     /**
      * The current page of the `DataGrid` to display
      *
@@ -246,6 +295,39 @@ DataGrid.propTypes = {
      * ```
      */
     onSort: PropTypes.func,
+    /**
+     * Whether the DataGrid only allows selecting single row at a time
+     *
+     * @param {boolean} singleSelect
+     * @default false
+     */
+    singleSelect: PropTypes.bool,
+    /**
+     * Handle row selection
+     *
+     * `selectedIds` contains the selected row Ids. Example: `[ <rowId1>, <rowId2>, ... ]`
+     *
+     * ```js
+     * function ({ selectedIds: string[] }) => void
+     * ```
+     */
+    onRowSelect: PropTypes.func,
+    /**
+     * Array of row Ids that should be initially selected
+     *
+     * @param {string[]} selected
+     * @default []
+     */
+    selected: PropTypes.arrayOf(PropTypes.string),
+    /**
+     * The Header label to display for selection column
+     *
+     * This is used when select all rows is disabled or `singleSelect` is `true`
+     *
+     * @param {string} selectColumnLabel
+     * @default ''
+     */
+    selectColumnLabel: PropTypes.string,
 };
 
 DataGrid.defaultProps = {
@@ -256,6 +338,9 @@ DataGrid.defaultProps = {
     rowsPerPageOptions: [5, 10, 20, 25],
     sortable: false,
     onSort: () => {},
+    singleSelect: false,
+    selected: [],
+    selectColumnLabel: '',
 };
 
 export default DataGrid;

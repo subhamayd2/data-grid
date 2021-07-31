@@ -1,10 +1,13 @@
 import { Box, Link } from '@material-ui/core';
 import { useEffect, useState } from 'react';
+import { useIntl } from 'react-intl';
 import DataGrid, { Column } from './data-grid';
 import { getData } from './requests';
 
 function App() {
+    const { formatMessage } = useIntl();
     const [gridData, setGridData] = useState([]);
+    const [selected, setSelected] = useState([]);
     // const [page, setPage] = useState(0);
     const initialPageSize = 10;
 
@@ -43,6 +46,13 @@ function App() {
         })();
     };
 
+    const handleOnRowSelect = ({ selectedIds }) => {
+        console.log({
+            selectedIds,
+        });
+        setSelected(selectedIds);
+    };
+
     return (
         <Box padding={4} bgcolor="#efefef" height="100vh">
             <DataGrid
@@ -53,6 +63,11 @@ function App() {
                 onPageChange={handlePageChange}
                 sortable
                 onSort={handleOnSort}
+                // singleSelect
+                selectColumnLabel={formatMessage({ id: 'select' })}
+                onRowSelect={handleOnRowSelect}
+                selected={selected}
+                getRowId="id"
             >
                 <Column accessor="bill_number" headerId="bill.number" align="right" />
                 <Column accessor="bill_amount" header="Amount ₹" />
